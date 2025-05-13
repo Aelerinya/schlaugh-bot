@@ -7,7 +7,8 @@ pub struct Post {
     pub body: String,
     pub tags: serde_json::Value,
     pub title: String,
-    pub url: String,
+    // The API always returns an empty string
+    url: String,
     #[serde(rename = "post_id")]
     pub post_id: String,
     pub date: NaiveDate,

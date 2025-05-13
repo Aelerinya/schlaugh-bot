@@ -1,7 +1,8 @@
 use worker::*;
 use chrono::DateTime;
 
-mod schlaugh;
+pub(crate) mod schlaugh;
+pub(crate) mod discord;
 
 #[event(scheduled)]
 async fn scheduled(
