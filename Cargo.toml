@@ -3,6 +3,8 @@ name = "schlaugh-bot"
 version = "0.1.0"
 edition = "2021"
 authors = [ "Lucie Philippon <lucie.philippon@proton.me>" ]
+repository = "https://github.com/Aelerinya/schlaugh-bot"
+license = "MIT"
 
 [package.metadata.release]
 release = false

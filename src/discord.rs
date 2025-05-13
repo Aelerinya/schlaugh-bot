@@ -1,16 +1,27 @@
-use serde_json::json;
 use crate::schlaugh;
 use html2md::parse_html;
+use serde_json::json;
 
 const MAX_DESCRIPTION_LENGTH: usize = 2000;
 
-
-pub async fn notify_with_webhook(webhook_url: &str, post: &schlaugh::Post, author: &schlaugh::AuthorInfo) -> Result<(), reqwest::Error> {
+pub async fn notify_with_webhook(
+    webhook_url: &str,
+    post: &schlaugh::Post,
+    author: &schlaugh::AuthorInfo,
+) -> Result<(), reqwest::Error> {
     let post_url = format!("https://schlaugh.com/~/{}", post.post_id);
     let client = reqwest::Client::new();
-    let markdown_body = parse_html(&post.body);
+
+    // Replace double newlines with br tags
+    let body_with_br = post.body.replace("\n", "<br />");
+    let markdown_body = parse_html(&body_with_br);
+
     let description = if markdown_body.len() > MAX_DESCRIPTION_LENGTH {
-        format!("{}[...]\n\n[Read more]({})", &markdown_body[..MAX_DESCRIPTION_LENGTH], post_url)
+        format!(
+            "{}[...]\n\n[Read more]({})",
+            &markdown_body[..MAX_DESCRIPTION_LENGTH],
+            post_url
+        )
     } else {
         markdown_body
     };
@@ -22,7 +33,6 @@ pub async fn notify_with_webhook(webhook_url: &str, post: &schlaugh::Post, autho
             "embeds": [
                 {
                     "title": if post.title.is_empty() { post.date.format("%Y-%m-%d").to_string() } else { post.title.clone() },
-                    // "type": "article",
                     "description": description,
                     "url": post_url,
                     "author": {
@@ -34,7 +44,6 @@ pub async fn notify_with_webhook(webhook_url: &str, post: &schlaugh::Post, autho
                         "text": "Schlaugh",
                         "icon_url": "https://www.schlaugh.com/favicon.png",
                     },
-                    // "color": 0x0099ff,
                     "provider": {
                         "name": "schlaugh-bot",
                         "url": "https://github.com/Aelerinya/schlaugh-bot",
@@ -48,10 +57,12 @@ pub async fn notify_with_webhook(webhook_url: &str, post: &schlaugh::Post, autho
     Ok(())
 }
 
-
 #[cfg(test)]
 #[tokio::test]
 async fn test_notify_with_webhook() {
-    let response = schlaugh::get_latest_posts("67c000111610bf329ab41598").await.unwrap();
-    notify_with_webhook("https://discord.com/api/webhooks/1371875768845598831/Xae_D8ABeSxDJ0-PaNz8JcFa_MCDHYfRPsxjbyfbZbb0E3YG2Q_G4zJYt4WfFds3PBya", &response.posts[2], &response.author_info).await.unwrap();
+    let response = schlaugh::get_latest_posts("67c000111610bf329ab41598")
+        .await
+        .unwrap();
+    dbg!(&response.posts[0]);
+    notify_with_webhook("https://discord.com/api/webhooks/1371875768845598831/Xae_D8ABeSxDJ0-PaNz8JcFa_MCDHYfRPsxjbyfbZbb0E3YG2Q_G4zJYt4WfFds3PBya", &response.posts[0], &response.author_info).await.unwrap();
 }
