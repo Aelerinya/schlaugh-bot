@@ -7,8 +7,8 @@ command = "cargo install -q worker-build && worker-build --release"
 
 
 [triggers]
-# Every 10 minutes
-crons = [ "*/10 * * * *" ]
+# Every day at 9:10 AM UTC
+crons = [ "10 9 * * *" ]
 
 
 [observability]
