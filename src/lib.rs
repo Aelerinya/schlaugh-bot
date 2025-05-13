@@ -1,11 +1,13 @@
 use worker::*;
 
-#[event(fetch)]
-async fn fetch(
-    _req: Request,
+mod schlaugh;
+
+#[event(scheduled)]
+async fn scheduled(
+    _envent: ScheduledEvent,
     _env: Env,
-    _ctx: Context,
-) -> Result<Response> {
+    _ctx: ScheduleContext,
+) {
     console_error_panic_hook::set_once();
-    Response::ok("Hello World!")
+    console_log!("Scheduled function executed");
 }

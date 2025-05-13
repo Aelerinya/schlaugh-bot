@@ -4,3 +4,8 @@ compatibility_date = "2025-05-13"
 
 [build]
 command = "cargo install -q worker-build && worker-build --release"
+
+
+[triggers]
+# Every 10 seconds
+crons = [ "*/10 * * * *" ]
