@@ -13,3 +13,7 @@ For now, the values are hardcoded, so you'll need to edit the code to change the
 ```bash
 npx wrangler deploy
 ```
+
+## What it looks like
+
+![Screenshot of the bot posting the latest schlaupdate](./screenshot.png)
