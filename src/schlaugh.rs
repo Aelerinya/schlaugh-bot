@@ -1,42 +1,43 @@
 use serde::Deserialize;
+use chrono::NaiveDate;
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct Post {
-    body: String,
-    tags: serde_json::Value,
-    title: String,
-    url: String,
+pub struct Post {
+    pub body: String,
+    pub tags: serde_json::Value,
+    pub title: String,
+    pub url: String,
     #[serde(rename = "post_id")]
-    post_id: String,
-    date: String,
+    pub post_id: String,
+    pub date: NaiveDate,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct AuthorInfo {
-    bio: Option<String>,
-    key: Option<String>,
+pub struct AuthorInfo {
+    pub bio: Option<String>,
+    pub key: Option<String>,
     #[serde(rename = "_id")]
-    id: String,
-    author: String,
+    pub id: String,
+    pub author: String,
     #[serde(rename = "authorPic")]
-    author_pic: String,
+    pub author_pic: String,
 }
 
 #[derive(Debug, Deserialize)]
 #[allow(dead_code)]
-struct Response {
-    error: bool,
-    posts: Vec<Post>,
+pub struct Response {
+    pub error: bool,
+    pub posts: Vec<Post>,
     #[serde(rename = "authorData")]
-    author_data: AuthorInfo,
-    pages: i32,
+    pub author_data: AuthorInfo,
+    pub pages: i32,
     #[serde(rename = "authorInfo")]
-    author_info: AuthorInfo,
+    pub author_info: AuthorInfo,
 }
 
-async fn get_latest_posts(user: &str) -> Result<Response, reqwest::Error> {
+pub async fn get_latest_posts(user: &str) -> Result<Response, reqwest::Error> {
     let client = reqwest::Client::new();
     client.post("https://www.schlaugh.com/getPosts")
         .body(format!("{{\"author\":\"{user}\",\"page\":0,\"postCode\":\"TFFF\",\"needAuthorInfo\":true}}"))
@@ -47,6 +48,7 @@ async fn get_latest_posts(user: &str) -> Result<Response, reqwest::Error> {
         .await
 }
 
+#[cfg(test)]
 #[tokio::test]
 async fn test_get_latest_posts() {
     let response = get_latest_posts("67c000111610bf329ab41598").await.unwrap();
