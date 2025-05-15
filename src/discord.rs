@@ -4,13 +4,11 @@ use serde_json::json;
 
 const MAX_DESCRIPTION_LENGTH: usize = 2000;
 
-pub async fn notify_with_webhook(
-    webhook_url: &str,
+pub fn create_embed(
     post: &schlaugh::Post,
     author: &schlaugh::AuthorInfo,
-) -> Result<(), reqwest::Error> {
+) -> serde_json::Value {
     let post_url = format!("https://schlaugh.com/~/{}", post.post_id);
-    let client = reqwest::Client::new();
 
     // Replace double newlines with br tags
     let body_with_br = post.body.replace("\n", "<br />");
@@ -26,30 +24,33 @@ pub async fn notify_with_webhook(
         markdown_body
     };
 
+    json!({
+        "title": if post.title.is_empty() { post.date.format("%Y-%m-%d").to_string() } else { post.title.clone() },
+        "description": description,
+        "url": post_url,
+        "author": {
+            "name": author.author,
+            "icon_url": author.author_pic,
+            "url": format!("https://schlaugh.com/{}", author.author),
+        },
+        "footer": {
+            "text": "Schlaugh",
+            "icon_url": "https://www.schlaugh.com/favicon.png",
+        },
+    })
+}
+
+pub async fn notify_with_webhook(
+    webhook_url: &str,
+    embeds: Vec<serde_json::Value>,
+) -> Result<(), reqwest::Error> {
+    let client = reqwest::Client::new();
+
     let response = client.post(webhook_url)
         .json(&json!({
             "username": "schlaugh-bot",
             "avatar_url": "https://www.schlaugh.com/favicon.png",
-            "embeds": [
-                {
-                    "title": if post.title.is_empty() { post.date.format("%Y-%m-%d").to_string() } else { post.title.clone() },
-                    "description": description,
-                    "url": post_url,
-                    "author": {
-                        "name": author.author,
-                        "icon_url": author.author_pic,
-                        "url": format!("https://schlaugh.com/{}", author.author),
-                    },
-                    "footer": {
-                        "text": "Schlaugh",
-                        "icon_url": "https://www.schlaugh.com/favicon.png",
-                    },
-                    "provider": {
-                        "name": "schlaugh-bot",
-                        "url": "https://github.com/Aelerinya/schlaugh-bot",
-                    }
-                }
-            ]
+            "embeds": embeds,
         }))
         .send()
         .await?;
@@ -64,5 +65,6 @@ async fn test_notify_with_webhook() {
         .await
         .unwrap();
     dbg!(&response.posts[0]);
-    notify_with_webhook("https://discord.com/api/webhooks/1371875768845598831/Xae_D8ABeSxDJ0-PaNz8JcFa_MCDHYfRPsxjbyfbZbb0E3YG2Q_G4zJYt4WfFds3PBya", &response.posts[0], &response.author_info).await.unwrap();
+    let embed = create_embed(&response.posts[0], &response.author_info);
+    notify_with_webhook("https://discord.com/api/webhooks/1371875768845598831/Xae_D8ABeSxDJ0-PaNz8JcFa_MCDHYfRPsxjbyfbZbb0E3YG2Q_G4zJYt4WfFds3PBya", vec![embed]).await.unwrap();
 }

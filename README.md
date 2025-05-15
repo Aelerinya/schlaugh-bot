@@ -8,7 +8,7 @@ The bot uses [Cloudflare Workers](https://developers.cloudflare.com/workers/) as
 
 ## Configuration
 
-For now, the values are hardcoded, so you'll need to edit the code to change the webhook URL and the user ID.
+The list of user IDs to fetch and the webhook URL are configured in the `wrangler.toml` file.
 
 ## Deployment
 
