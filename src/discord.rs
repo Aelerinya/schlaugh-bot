@@ -4,10 +4,7 @@ use serde_json::json;
 
 const MAX_DESCRIPTION_LENGTH: usize = 2000;
 
-pub fn create_embed(
-    post: &schlaugh::Post,
-    author: &schlaugh::AuthorInfo,
-) -> serde_json::Value {
+pub fn create_embed(post: &schlaugh::Post, author: &schlaugh::AuthorInfo) -> serde_json::Value {
     let post_url = format!("https://schlaugh.com/~/{}", post.post_id);
 
     // Replace double newlines with br tags
@@ -46,7 +43,8 @@ pub async fn notify_with_webhook(
 ) -> Result<(), reqwest::Error> {
     let client = reqwest::Client::new();
 
-    let response = client.post(webhook_url)
+    let response = client
+        .post(webhook_url)
         .json(&json!({
             "username": "schlaugh-bot",
             "avatar_url": "https://www.schlaugh.com/favicon.png",
@@ -61,10 +59,17 @@ pub async fn notify_with_webhook(
 #[cfg(test)]
 #[tokio::test]
 async fn test_notify_with_webhook() {
+    dotenv::from_filename(".dev.vars").ok();
+
     let response = schlaugh::get_latest_posts("67c000111610bf329ab41598")
         .await
         .unwrap();
     dbg!(&response.posts[0]);
     let embed = create_embed(&response.posts[0], &response.author_info);
-    notify_with_webhook("https://discord.com/api/webhooks/1371875768845598831/Xae_D8ABeSxDJ0-PaNz8JcFa_MCDHYfRPsxjbyfbZbb0E3YG2Q_G4zJYt4WfFds3PBya", vec![embed]).await.unwrap();
+    notify_with_webhook(
+        &std::env::var("DISCORD_WEBHOOK_URL").expect("Missing DISCORD_WEBHOOK_URL"),
+        vec![embed],
+    )
+    .await
+    .unwrap();
 }

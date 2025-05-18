@@ -8,7 +8,21 @@ The bot uses [Cloudflare Workers](https://developers.cloudflare.com/workers/) as
 
 ## Configuration
 
-The list of user IDs to fetch and the webhook URL are configured in the `wrangler.toml` file.
+The list of user IDs to fetch is configured in the `wrangler.toml` file.
+
+The Discord webhook is managed using [Worker Secrets](https://developers.cloudflare.com/workers/configuration/secrets/).
+
+For local development, create a `.dev.vars` file with content:
+
+```env
+DISCORD_WEBHOOK_URL=...
+```
+
+For deployment, set the secret value with wrangler:
+
+```sh
+npx wrangler secret put DISCORD_WEBHOOK_URL
+```
 
 ## Deployment
 
